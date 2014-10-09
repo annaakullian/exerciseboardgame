@@ -110,8 +110,10 @@ class Board(object):
 
     def check_bounds(self, x, y):
         if not (0 <= x < self.width):
+            # self.draw_msg("You can't go there!")
             raise IndexError("%r is out of bounds of the board width: %d"%(x, self.width))
         if not (0 <= y < self.height):
+            # self.board.draw_msg("You can't go there!")
             raise IndexError("%r is out of bounds of the board height: %d"%(y, self.width))
 
     # Return if there is a game element in a given position

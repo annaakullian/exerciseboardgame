@@ -5,8 +5,8 @@ from pyglet.window import key
 from core import GameElement
 from board import Board
 
-SCREEN_X = 800
-SCREEN_Y = 700
+SCREEN_X = 1000
+SCREEN_Y = 1000
 
 game_window = pyglet.window.Window(SCREEN_X, SCREEN_Y)
 board = None

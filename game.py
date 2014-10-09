@@ -12,21 +12,65 @@ DEBUG = False
 GAME_WIDTH = 10
 GAME_HEIGHT = 10
 
-class Rock(GameElement):
-    IMAGE = 'Rock'
-    SOLID = True
+class Object(GameElement):
+    SOLID = True 
+    def __init__(self):
+        GameElement.__init__(self)
 
-class Gem(GameElement):
-    IMAGE = 'BlueGem'
+    
+
+class Rock(Object):
+    IMAGE = 'Rock'
+
+class Door(Object):
+    door_position = "closed"
+    IMAGE = "DoorClosed"
+
+    # if door_position == 'open':
+    def interact(self, player):
+        if self.door_position == "closed":
+            if (len(player.inventory)) >= 5:
+                self.door_position = "open"
+                del player.inventory[-5:]
+                GAME_BOARD.draw_msg("Congratulations! You just opened the door. Now, you only have %d Gems!" % (len(player.inventory)))
+                self.change_image("DoorOpen")
+                self.SOLID = False
+
+            else:
+                GAME_BOARD.draw_msg("Sorry! You don't have enough gems to open the door. You need %d more Gems." % (5 - (len(player.inventory))))
+        
+        if not self.SOLID:
+            player.hover = self
+
+class MasterDoor(Door):
+
+    def interact(self, player):
+        if self.door_position == "closed":
+            if (len(player.inventory)) >= 10:
+                self.door_position = "open"
+                del player.inventory[-10:]
+                GAME_BOARD.draw_msg("Congratulations! You win!")
+                player.change_image("Princess")
+                self.SOLID = False
+
+            else:
+                GAME_BOARD.draw_msg("Sorry! You don't have enough gems to open the door. You need %d more Gems." % (10 - (len(player.inventory))))
+        
+        if not self.SOLID:
+            player.hover = self
+
+class Gem(Object):
     SOLID = False
+
+    def __init__(self, IMAGE):
+        self.IMAGE = IMAGE
 
     def interact(self, player):
         player.inventory.append(self)
         GAME_BOARD.draw_msg("You just acquired a gem! You have %d items!" % (len(player.inventory)))
 
-class Tree(GameElement):
+class Tree(Object):
     IMAGE = 'TallTree'
-    SOLID = True
 
 class Character(GameElement):
     IMAGE = 'Cat'
@@ -34,6 +78,7 @@ class Character(GameElement):
     def __init__(self):
         GameElement.__init__(self)
         self.inventory = []
+        self.hover = None
 
     def next_pos(self, direction):
         if direction == "up":
@@ -76,19 +121,26 @@ class Character(GameElement):
                 else:
 
                     existing_el = self.board.get_el(next_x, next_y)
+                    hover = self.hover
 
                     if existing_el:
                         existing_el.interact(self)
 
-                    if existing_el and existing_el.SOLID:
-                        self.board.draw_msg("There's something in my way!")
-                    elif existing_el is None or not existing_el.SOLID:
+                    # if existing_el and existing_el.SOLID:
+                    #     self.board.draw_msg("There's something in my way!")
+                    if existing_el is None or not existing_el.SOLID:
                         self.board.del_el(self.x, self.y)
+                        if hover:
+                            self.board.set_el(self.x, self.y, hover)
+                            self.hover = None
                         self.board.set_el(next_x, next_y, self)
+
+            
+
 
 def initialize():
     """Put game initialization code here"""
-    rock_positions = [(2,1), (1,2), (3,2), (2,3)]
+    rock_positions = [(1,0), (1,3), (1,6), (1,7), (1,9), (2,2), (2,3), (2,6), (3,1), (3,6), (4,0), (4,3), (4,6), (5,1), (6,1), (6,2), (6,5), (6,6), (8,1), (8,2), (8,3), (8,6), (8,7), (8,9)]
     rocks = []
 
     for pos in rock_positions:
@@ -100,14 +152,42 @@ def initialize():
 
     player = Character()
     GAME_BOARD.register(player)
-    GAME_BOARD.set_el(2,2, player)
+    GAME_BOARD.set_el(0,0, player)
 
     GAME_BOARD.draw_msg('This game is wicked awesome.')
+    greengem_positions = [(0,5), (0,7), (0,9), (2,0), (3,2), (3,7), (5,0), (5,3), (5,7), (7,2), (7,8), (9,0), (9,4)]
+    bluegem_positions = [(0,3), (0,8), (2,1), (2,9), (3,0), (3,5), (5,2), (5,6), (7,0), (7,5), (9,2), (9,6)]
+    
+    gems = [] 
+    for pos in greengem_positions:
+        gem = Gem('GreenGem')
+        GAME_BOARD.register(gem)
+        GAME_BOARD.set_el(pos[0], pos[1], gem)
+        gems.append(gem)
 
-    gem = Gem()
-    GAME_BOARD.register(gem)
-    GAME_BOARD.set_el(3, 1, gem)
 
-    tree = Tree()
-    GAME_BOARD.register(tree)
-    GAME_BOARD.set_el(5, 5, tree)
+    for pos in bluegem_positions:
+        gem = Gem('BlueGem')
+        GAME_BOARD.register(gem)
+        GAME_BOARD.set_el(pos[0], pos[1], gem)
+        gems.append(gem)
+
+    tree_positions = [(1,2), (1,4), (1,8), (2,4), (3,4), (3,8), (4,1), (4,4), (4,8), (5,8), (6,8), (6,7), (6,3), (6,4), (8,4), (8,5), (8,8)]    
+    trees = []
+    for pos in tree_positions:
+        tree = Tree()
+        GAME_BOARD.register(tree)
+        GAME_BOARD.set_el(pos[0], pos[1], tree)
+        trees.append(tree) 
+
+    door_positions = [(0,6), (1,1), (6,9)]    
+    doors = []
+    for pos in door_positions:
+        door = Door()
+        GAME_BOARD.register(door)
+        GAME_BOARD.set_el(pos[0], pos[1], door)
+        doors.append(door) 
+
+    masterdoor = MasterDoor()
+    GAME_BOARD.register(masterdoor)
+    GAME_BOARD.set_el(9, 9, masterdoor)

@@ -44,20 +44,42 @@ class Door(Object):
 
 class MasterDoor(Door):
 
+    end_of_game = False
+
     def interact(self, player):
         if self.door_position == "closed":
             if (len(player.inventory)) >= 10:
                 self.door_position = "open"
                 del player.inventory[-10:]
-                GAME_BOARD.draw_msg("Congratulations! You win!")
                 player.change_image("Princess")
                 self.SOLID = False
+                player.saved_score = None
+                if player.saved_score:
+                    if player.saved_score > player.SCORE:
+                        GAME_BOARD.draw_msg("Oh no! You didn't beat your high score of %d. Play again!" % player.saved_score)
+                    elif player.saved_score <= player.SCORE:
+                        GAME_BOARD.draw_msg("Congratulations! You got the high score of %d!" % player.SCORE)
+                else:
+                    GAME_BOARD.draw_msg("Congratulations! You won in %d moves." % player.SCORE)
+
+                self.end_of_game = True
+                player.saved_score = player.SCORE
 
             else:
                 GAME_BOARD.draw_msg("Sorry! You don't have enough gems to open the door. You need %d more Gems." % (10 - (len(player.inventory))))
         
         if not self.SOLID:
             player.hover = self
+
+    def keyboard_handler(self, symbol, modifier):
+        super(MasterDoor, self).keyboard_handler(symbol, modifier)
+        if self.end_of_game == True:
+            GAME_BOARD.draw_msg("Would you like to play again? Y/N")
+
+        if symbol == key.Y:
+            reset()
+            self.end_of_game = False
+
 
 class Gem(Object):
     SOLID = False
@@ -74,6 +96,7 @@ class Tree(Object):
 
 class Character(GameElement):
     IMAGE = 'Cat'
+    SCORE = 0
 
     def __init__(self):
         GameElement.__init__(self)
@@ -105,6 +128,7 @@ class Character(GameElement):
             direction = "right"
 
         self.board.draw_msg('[%s] moves %s' % (self.IMAGE, direction))
+        self.SCORE += 1
 
         if direction:
             next_location = self.next_pos(direction)
@@ -135,11 +159,14 @@ class Character(GameElement):
                             self.hover = None
                         self.board.set_el(next_x, next_y, self)
 
-            
-
 
 def initialize():
     """Put game initialization code here"""
+
+    player = Character()
+    GAME_BOARD.register(player)
+    GAME_BOARD.set_el(0,0, player)
+
     rock_positions = [(1,0), (1,3), (1,6), (1,7), (1,9), (2,2), (2,3), (2,6), (3,1), (3,6), (4,0), (4,3), (4,6), (5,1), (6,1), (6,2), (6,5), (6,6), (8,1), (8,2), (8,3), (8,6), (8,7), (8,9)]
     rocks = []
 
@@ -148,11 +175,6 @@ def initialize():
         GAME_BOARD.register(rock)
         GAME_BOARD.set_el(pos[0], pos[1], rock)
         rocks.append(rock)
-    rocks[-1].SOLID = False
-
-    player = Character()
-    GAME_BOARD.register(player)
-    GAME_BOARD.set_el(0,0, player)
 
     GAME_BOARD.draw_msg('This game is wicked awesome.')
     greengem_positions = [(0,5), (0,7), (0,9), (2,0), (3,2), (3,7), (5,0), (5,3), (5,7), (7,2), (7,8), (9,0), (9,4)]
@@ -191,3 +213,8 @@ def initialize():
     masterdoor = MasterDoor()
     GAME_BOARD.register(masterdoor)
     GAME_BOARD.set_el(9, 9, masterdoor)
+
+
+def reset():
+    GAME_BOARD.update_list = []
+    initialize()

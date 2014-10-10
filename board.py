@@ -45,9 +45,9 @@ class Board(object):
         for i in range(self.height):
             if i == 0 or i == self.height-1:
                 # On the boundaries
-                game_map.append(["Block"] * self.width)
+                game_map.append(["Heart"] * self.width)
             else:
-                row = ["Block"] + (["GrassBlock"] * inner_width) + ["Block"]
+                row = ["Heart"] + (["Heart"] * inner_width) + ["Heart"]
                 game_map.append(row)
         
         self.base_board = game_map

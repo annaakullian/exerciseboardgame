@@ -167,7 +167,7 @@ def initialize():
     GAME_BOARD.register(player)
     GAME_BOARD.set_el(0,0, player)
 
-    rock_positions = [(1,0), (1,3), (1,6), (1,7), (1,9), (2,2), (2,3), (2,6), (3,1), (3,6), (4,0), (4,3), (4,6), (5,1), (6,1), (6,2), (6,5), (6,6), (8,1), (8,2), (8,3), (8,6), (8,7), (8,9)]
+    rock_positions = [(1,0), (6,0), (1,3), (1,6), (1,7), (1,9), (2,2), (2,3), (2,6), (3,1), (3,6), (4,3), (4,6), (5,1), (6,1), (6,2), (6,5), (6,6), (8,1), (8,2), (8,3), (8,6), (8,7), (8,9)]
     rocks = []
 
     for pos in rock_positions:
@@ -177,8 +177,8 @@ def initialize():
         rocks.append(rock)
 
     GAME_BOARD.draw_msg('This game is wicked awesome.')
-    greengem_positions = [(0,5), (0,7), (0,9), (2,0), (3,2), (3,7), (5,0), (5,3), (5,7), (7,2), (7,8), (9,0), (9,4)]
-    bluegem_positions = [(0,3), (0,8), (2,1), (2,9), (3,0), (3,5), (5,2), (5,6), (7,0), (7,5), (9,2), (9,6)]
+    greengem_positions = [(4,9), (3,3), (4,2), (0,7), (0,9), (2,0), (3,2), (3,7), (5,0), (5,3), (5,7), (7,2), (7,8), (9,0), (9,4)]
+    bluegem_positions = [(0,3), (4,0), (0,8), (2,1), (2,9), (3,0), (3,5), (5,2), (5,6), (7,0), (7,5), (9,2), (9,6)]
     
     gems = [] 
     for pos in greengem_positions:
@@ -202,7 +202,7 @@ def initialize():
         GAME_BOARD.set_el(pos[0], pos[1], tree)
         trees.append(tree) 
 
-    door_positions = [(0,6), (1,1), (6,9)]    
+    door_positions = [(0,6), (1,1), (6,9), (4,7)]    
     doors = []
     for pos in door_positions:
         door = Door()
